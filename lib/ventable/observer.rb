@@ -6,7 +6,7 @@ module Ventable
 
     module ClassMethods
       def observe event, method = nil
-        event.observe_by self, method
+        event.observed_by self, method
       end
     end
   end

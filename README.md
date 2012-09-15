@@ -18,42 +18,67 @@ Or install it yourself as:
 
 ## Usage
 
+1. Create your own event class that optionally carries some data important to the event. Include module Ventable::Event.
+2. Create one or more observers.  Observer can be any class that implements event handler, or you can include Ventable::Observer to get "observe" class method.
+3. If you have not used observe method, add your observer by calling "observed_by" class method on the event, and add the observer.
+4. Instantiate your event, and call fire!() method.
+
+## Example
+
 ```ruby
-  require 'ventable'
+require 'ventable'
 
-  class SomeEvent
-    include Ventable::Event
-    attr_accessor :data
-    def initialize(data)
-      @data = data
-    end
+# this is a custom Event class that has some data
+class WakeUpEvent
+  include Ventable::Event
+  attr_accessor :wakeup_time, :user
+
+  def initialize(user, wakeup_time)
+    self.user = user
+    self.wakeup_time = wakeup_time
+  end
+end
+
+# Mom is an observer, interested in WakeUpEvents
+class Mom
+  include Ventable::Observer
+  observe WakeUpEvent, :wake_mom_up
+
+  def make_breakfast
+    puts "MOM: Breakfast is coming!"
   end
 
-  class SomeObserver
-    include Ventable::Observer
-    observe SomeEvent, :some_event_handler
-
-    def self.some_event_handler(event)
-      puts "SomeObserver got event #{event}"
-    end
+  def self.wake_mom_up(event)
+    self.find_mom_for(event.user).make_breakfast
   end
 
-  class AnotherObserver
-    def self.some_event_handler(event)
-      puts "AnotherObserver got event #{event}"
-    end
+  def self.find_mom_for(user)
+    Mom.new
+  end
+end
+
+# Boss is also an observer
+class Boss
+  def discipline_employee(user)
+    puts "BOSS: Mr #{user.last}, you need to get before 9am!"
   end
 
-  SomeEvent.observe_by AnotherObserver, :some_event_handler
+  def handle_wake_up_event(event)
+    if event.wakeup_time.hour < 9
+      discipline_employee(event.user)
+    end
+  end
+end
 
-  ....
+WakeUpEvent.observed_by Boss.new
 
-  SomeEvent.create{ User.create!(:username => "test") }.fire!
+begin
+  user = Struct.new(:first,:last).new("John", "Doe")
+  event = WakeUpEvent.new(user, Time.now)
+  event.fire!
+end
 
-  # should generate the following output:
 
-  SomeObserver got event #<SomeEvent:0x007fbd7b8c6f00>
-  AnotherObserver got event #<SomeEvent:0x007fbd7b8c6f00>
 ```
 
 ## Contributing
