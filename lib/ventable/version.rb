@@ -1,0 +1,3 @@
+module Ventable
+  VERSION = "0.0.1"
+end
