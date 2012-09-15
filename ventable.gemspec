@@ -4,9 +4,9 @@ require File.expand_path('../lib/ventable/version', __FILE__)
 Gem::Specification.new do |gem|
   gem.authors       = ["Konstantin Gredeskoul"]
   gem.email         = ["kigster@gmail.com"]
-  gem.description   = %q{TODO: Write a gem description}
-  gem.summary       = %q{TODO: Write a gem summary}
-  gem.homepage      = ""
+  gem.description   = %q{Event/Observable pattern with various options}
+  gem.summary       = %q{Event/Observable support gem for plain ruby}
+  gem.homepage      = "https://github.com/kigster/ventable"
 
   gem.files         = `git ls-files`.split($\)
   gem.executables   = gem.files.grep(%r{^bin/}).map{ |f| File.basename(f) }
