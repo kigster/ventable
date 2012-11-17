@@ -4,8 +4,8 @@ require File.expand_path('../lib/ventable/version', __FILE__)
 Gem::Specification.new do |gem|
   gem.authors       = ["Konstantin Gredeskoul"]
   gem.email         = ["kigster@gmail.com"]
-  gem.description   = %q{Event/Observable pattern with various options}
-  gem.summary       = %q{Event/Observable support gem for plain ruby}
+  gem.description   = %q{Event/Observable design pattern in ruby}
+  gem.summary       = %q{Event/Observable design pattern in ruby}
   gem.homepage      = "https://github.com/kigster/ventable"
 
   gem.files         = `git ls-files`.split($\)
@@ -15,6 +15,7 @@ Gem::Specification.new do |gem|
   gem.require_paths = ["lib"]
   gem.version       = Ventable::VERSION
 
-  gem.add_development_dependency "rspec", "~> 2.11.0"
-  gem.add_development_dependency "rspec-mocks", "~> 2.11.0"
+  gem.add_development_dependency "rspec"
+  gem.add_development_dependency "rspec-mocks"
+  gem.add_development_dependency 'guard-rspec'
 end

@@ -1,3 +1,5 @@
+[![Build status](https://secure.travis-ci.org/kigster/ventable.png)](http://travis-ci.org/kigster/ventable)
+
 # Ventable
 
 Simple eventing gem that implements Observable pattern.
