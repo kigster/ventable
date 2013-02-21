@@ -1,3 +1,4 @@
+
 # -*- encoding: utf-8 -*-
 require File.expand_path('../lib/ventable/version', __FILE__)
 

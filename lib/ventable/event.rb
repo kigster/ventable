@@ -2,64 +2,84 @@ require 'set'
 
 module ::Ventable
   module Event
-    OBSERVERS = Hash.new
+    def self.included(klazz)
+      klazz.instance_eval do
+        @observers = Set.new
+        class << self
+          attr_accessor :observers
+        end
+      end
 
-    class ObserverRegistration < Struct.new(:observer, :method);
+      klazz.extend ClassMethods
     end
 
-    def self.reset!
-      OBSERVERS.clear
+    def fire!
+      notify_observer_set(self.class.observers)
     end
 
-    def self.included(base)
-      base.extend ClassMethods
-      base.send :include, InstanceMethods
-    end
+    private
 
-    module InstanceMethods
-      def fire!
-        if self.respond_to?(:around_fire)
-          self.around_fire do
-            _fire
-          end
+    def notify_observer_set(observer_set)
+      observer_set.each do |observer_entry|
+        if observer_entry.is_a?(Hash)
+          around_block = observer_entry[:around_block]
+          inside_block = -> { notify_observer_set(observer_entry[:observers]) }
+          around_block.call(inside_block)
         else
-          _fire
+          notify_observer(observer_entry)
         end
       end
+    end
 
-      def _fire
-        observer_registrations = ::Ventable::Event::OBSERVERS[self.class.name] || []
-        observer_registrations.each do |observer_registration|
-          target = observer_registration[:observer]
-          if target.is_a?(Proc)
-            target.call(self)
-          else
-            target.send(observer_registration[:method], self)
-          end
-        end
+    def notify_observer(observer)
+      case observer
+        when Proc
+          observer.call(self)
+        else # class
+          notify_class_observer(observer)
       end
+    end
+
+    def notify_class_observer(observer)
+      observer.respond_to?(self.class.default_callback_method) ?
+          observer.send(self.class.default_callback_method, self) :
+          observer.send(:handle_event, self)
     end
 
     module ClassMethods
-      def observed_by observer = nil, method = nil, &block
-        ::Ventable::Event::OBSERVERS[self.name] ||= Set.new
-        new_registration = if block && !observer
-                             ObserverRegistration.new(block, nil)
-                           else
-                             method = default_callback_method unless method.is_a?(Symbol)
-                             ObserverRegistration.new(observer, method)
-                           end
-        ::Ventable::Event::OBSERVERS[self.name] << new_registration
+      def configure(&block)
+        class_eval(&block)
       end
 
-      def create_event(*args, &block)
-        self.new block.call
+      def notifies(*observer_list, &block)
+        options = {}
+        options.merge! observer_list.pop if observer_list.last.is_a?(Hash)
+        observer_set = self.observers
+        if options[:inside]
+          observer_entry = self.find_observer_group(options[:inside])
+          observer_set = observer_entry[:observers]
+        end
+        observer_list.each { |o| observer_set << o } unless observer_list.empty?
+        observer_set << block if block
+      end
+
+      def group(name, &block)
+        raise "Group #{name} already defined by #{g}" if  find_observer_group(name)
+        self.observers <<
+            { name: name,
+              around_block: block,
+              observers: Set.new
+            }
+      end
+
+      def find_observer_group(name)
+        self.observers.find { |o| o.is_a?(Hash) && o[:name] == name }
       end
 
       def default_callback_method
-        _target = self
-        _method = "handle_" + _target.name.underscore.gsub(/_event/, '') + "_event"
-        _method.to_sym
+        target = self
+        method = "handle_" + target.name.gsub(/.*::/,'').underscore.gsub(/_event/, '') + "_event"
+        method.to_sym
       end
     end
   end
