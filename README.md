@@ -35,6 +35,7 @@ Or install it yourself as:
 require 'ventable'
 
 # this is a custom Event class that has some data associated with it
+
 class AlarmSoundEvent
   include Ventable::Event
   attr_accessor :wakeup_time
@@ -45,8 +46,8 @@ class AlarmSoundEvent
 end
 
 # This class is an observer, interested in WakeUpEvents.
-class SleepingPerson
 
+class SleepingPerson
   def self.handle_wake_up_event(event)
     self.wake_up
     puts "snoozing at #{event.wakeup_time}"
@@ -54,40 +55,41 @@ class SleepingPerson
   end
   #.. implementation
 end
+```
 
-# Using #configure and groups
+## Using #configure and groups
+
 
 Events can be configured to call observers in groups, with an optional block around it.
 
-
-
 ```ruby
-  transaction = ->(b){
-    ActiveRecord::Base.transaction do
-      b.call
-    end
-  }
 
-  SomeEvent.configure do
-    # first observer to be called
-    notifies FirstObserverClassToBeCalled
+transaction = ->(b){
+  ActiveRecord::Base.transaction do
+    b.call
+  end
+}
 
-    # this group will be notified next
-    group :transaction, &transaction
+SomeEvent.configure do
+  # first observer to be called
+  notifies FirstObserverClassToBeCalled
 
-    # this block is executed after the group
-    notifies inside: :transaction do
-      # perform block
-    end
+  # this group will be notified next
+  group :transaction, &transaction
 
-    # these observers are run inside the transaction block
-    notifies ObserverClass1, ObserverClass2, inside: :transaction
-
-    # this one is the last to be notified
-    notifies AnotherObserverClass
+  # this block is executed after the group
+  notifies inside: :transaction do
+    # perform block
   end
 
-  SameEvent.new.fire!
+  # these observers are run inside the transaction block
+  notifies ObserverClass1, ObserverClass2, inside: :transaction
+
+  # this one is the last to be notified
+  notifies AnotherObserverClass
+end
+
+SameEvent.new.fire!
 
 ```
 
