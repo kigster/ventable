@@ -58,6 +58,8 @@ end
 # Register the observer
 AlarmSoundEvent.notifies SleepingPerson
 
+# Create and fire the event
+AlarmSoundEvent.new(Date.new).fire!
 ```
 
 ## Using #configure and groups
@@ -96,7 +98,7 @@ SomeEvent.configure do
   notifies AnotherObserverClass
 end
 
-SameEvent.new.fire!
+SomeEvent.new.fire!
 
 ```
 
