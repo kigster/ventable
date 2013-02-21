@@ -26,8 +26,9 @@ Or install it yourself as:
 2. Create one or more observers.  Observer can be any class that implements event handler method as a class method, such as a
    generic method ```self.handle_event(event)``` or a more specific method mapped to the event name: say for event UserRegistered the
    callback event would be ```self.handle_user_registered_event(event)```
-3. If you have not used observe method, add your observer by calling "observed_by" class method on the event, and add the observer.
-4. Instantiate your event, and call fire!() method.
+3. Register your observers with the event using ```notifies``` event method, or register groups using ```group``` method, and then
+   use ```notify``` with options ```inside: :group_name```
+4. Instantiate your event (optionally with data), and call fire!() method.
 
 ## Example
 
