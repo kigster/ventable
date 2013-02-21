@@ -81,7 +81,7 @@ describe Ventable do
     it "should properly call a group of observers" do
       transaction_called = false
       transaction_completed = false
-      transaction = ->(observer_block){
+      transaction = ->(observer_block) {
         transaction_called = true
         observer_block.call
         transaction_completed = true
@@ -93,9 +93,11 @@ describe Ventable do
       # this flag ensures that this block really runs inside
       # the transaction group block
       transaction_already_completed = false
+      event_inside = nil
       TestEvent.notifies inside: :transaction do |event|
         observer_block_called = true
         transaction_already_completed = transaction_completed
+        event_inside = event
       end
 
       transaction_called.should be_false
@@ -107,6 +109,8 @@ describe Ventable do
       transaction_called.should be_true
       observer_block_called.should be_true
       transaction_already_completed.should be_false
+      event_inside.should_not be_nil
+      event_inside.should be_a(TestEvent)
     end
   end
 
