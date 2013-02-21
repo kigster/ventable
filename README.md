@@ -46,7 +46,6 @@ class AlarmSoundEvent
 end
 
 # This class is an observer, interested in WakeUpEvents.
-
 class SleepingPerson
   def self.handle_wake_up_event(event)
     self.wake_up
@@ -55,6 +54,10 @@ class SleepingPerson
   end
   #.. implementation
 end
+
+# Register the observer
+AlarmSoundEvent.notifies SleepingPerson
+
 ```
 
 ## Using #configure and groups
@@ -69,6 +72,10 @@ transaction = ->(b){
     b.call
   end
 }
+
+class SomeEvent
+  include Ventable::Event
+end
 
 SomeEvent.configure do
   # first observer to be called
