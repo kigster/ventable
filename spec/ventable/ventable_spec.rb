@@ -1,14 +1,13 @@
 require 'ventable'
 require 'pp'
 describe Ventable do
+  before do
+    class TestEvent
+      include Ventable::Event
+    end
+  end
 
   describe "including Ventable::Event" do
-    before do
-      class TestEvent
-        include Ventable::Event
-      end
-    end
-
     it "should create a class instance variable to keep observers" do
       TestEvent.observers.should_not be_nil
       TestEvent.observers.should be_a(Set)
@@ -116,7 +115,6 @@ describe Ventable do
 
   describe "#default_callback_method" do
     before do
-
       class SomeAwesomeEvent
         include Ventable::Event
       end
@@ -134,4 +132,32 @@ describe Ventable do
     end
   end
 
+  describe "#configure" do
+    it "properly configures the event with observesrs" do
+      notified_observer = false
+      called_transaction = false
+      TestEvent.configure do
+        notifies do
+          notified_observer = true
+        end
+      end
+    end
+
+    it "configures observers with groups" do
+      notified_observer = false
+      called_transaction = false
+      TestEvent.configure do
+        group :transaction, &->(b){
+          b.call
+          called_transaction = true
+        }
+        notifies inside: :transaction do
+          notified_observer = true
+        end
+      end
+      TestEvent.new.fire!
+      notified_observer.should be_true
+      called_transaction.should be_true
+    end
+  end
 end
