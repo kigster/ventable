@@ -124,23 +124,29 @@ describe Ventable do
           include Ventable::Event
         end
       end
+
+      class SomeOtherStuffHappened
+        include Ventable::Event
+      end
     end
 
     it "should properly set the callback method name" do
       SomeAwesomeEvent.default_callback_method.should == :handle_some_awesome_event
       Blah::AnotherSweetEvent.default_callback_method.should == :handle_another_sweet_event
+      SomeOtherStuffHappened.default_callback_method.should == :handle_some_other_stuff_happened_event
     end
   end
 
   describe "#configure" do
     it "properly configures the event with observesrs" do
       notified_observer = false
-      called_transaction = false
       TestEvent.configure do
         notifies do
           notified_observer = true
         end
       end
+      TestEvent.new.fire!
+      notified_observer.should be_true
     end
 
     it "configures observers with groups" do

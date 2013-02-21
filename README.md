@@ -2,7 +2,9 @@
 
 # Ventable
 
-Simple eventing gem that implements Observable pattern.
+Simple eventing gem that implements Observable pattern, but with more options, ability to group observers and wrap
+them in arbitrary blocks of code.  For example, when a certain event fires, some observers may be called within
+a transaction context, while others maybe called outside of the transaction context.
 
 ## Installation
 
@@ -20,8 +22,10 @@ Or install it yourself as:
 
 ## Usage
 
-1. Create your own event class that optionally carries some data important to the event. Include module Ventable::Event.
-2. Create one or more observers.  Observer can be any class that implements event handler, or you can include Ventable::Observer to get "observe" class method.
+1. Create your own plain ruby class that optionally carries some data important to the event. Include module Ventable::Event.
+2. Create one or more observers.  Observer can be any class that implements event handler method as a class method, such as a
+   generic method ```self.handle_event(event)``` or a more specific method mapped to the event name: say for event UserRegistered the
+   callback event would be ```self.handle_user_registered_event(event)```
 3. If you have not used observe method, add your observer by calling "observed_by" class method on the event, and add the observer.
 4. Instantiate your event, and call fire!() method.
 
@@ -30,56 +34,60 @@ Or install it yourself as:
 ```ruby
 require 'ventable'
 
-# this is a custom Event class that has some data
-class WakeUpEvent
+# this is a custom Event class that has some data associated with it
+class AlarmSoundEvent
   include Ventable::Event
-  attr_accessor :wakeup_time, :user
+  attr_accessor :wakeup_time
 
-  def initialize(user, wakeup_time)
-    self.user = user
-    self.wakeup_time = wakeup_time
+  def initialize(wakeup_time)
+    @wakeup_time = wakeup_time
   end
 end
 
-# Mom is an observer, interested in WakeUpEvents
-class Mom
-  include Ventable::Observer
-  observe WakeUpEvent, :wake_mom_up
+# This class is an observer, interested in WakeUpEvents.
+class SleepingPerson
 
-  def make_breakfast
-    puts "MOM: Breakfast is coming!"
+  def self.handle_wake_up_event(event)
+    self.wake_up
+    puts "snoozing at #{event.wakeup_time}"
+    self.snooze(5)
   end
-
-  def self.wake_mom_up(event)
-    self.find_mom_for(event.user).make_breakfast
-  end
-
-  def self.find_mom_for(user)
-    Mom.new
-  end
+  #.. implementation
 end
 
-# Boss is also an observer
-class Boss
-  def discipline_employee(user)
-    puts "BOSS: Mr #{user.last}, you need to get before 9am!"
-  end
+# Using #configure and groups
 
-  def handle_wake_up_event(event)
-    if event.wakeup_time.hour < 9
-      discipline_employee(event.user)
+Events can be configured to call observers in groups, with an optional block around it.
+
+
+
+```ruby
+  transaction = ->(b){
+    ActiveRecord::Base.transaction do
+      b.call
     end
+  }
+
+  SomeEvent.configure do
+    # first observer to be called
+    notifies FirstObserverClassToBeCalled
+
+    # this group will be notified next
+    group :transaction, &transaction
+
+    # this block is executed after the group
+    notifies inside: :transaction do
+      # perform block
+    end
+
+    # these observers are run inside the transaction block
+    notifies ObserverClass1, ObserverClass2, inside: :transaction
+
+    # this one is the last to be notified
+    notifies AnotherObserverClass
   end
-end
 
-WakeUpEvent.observed_by Boss.new
-
-begin
-  user = Struct.new(:first,:last).new("John", "Doe")
-  event = WakeUpEvent.new(user, Time.now)
-  event.fire!
-end
-
+  SameEvent.new.fire!
 
 ```
 
@@ -90,3 +98,7 @@ end
 3. Commit your changes (`git commit -am 'Added some feature'`)
 4. Push to the branch (`git push origin my-new-feature`)
 5. Create new Pull Request
+
+## Author
+
+Konstantin Gredeskoul, @kig, http://github.com/kigster
