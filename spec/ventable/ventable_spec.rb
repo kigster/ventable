@@ -107,7 +107,9 @@ describe Ventable do
 
       transaction_called.should be_true
       observer_block_called.should be_true
+      transaction_called.should be_true
       transaction_already_completed.should be_false
+
       event_inside.should_not be_nil
       event_inside.should be_a(TestEvent)
     end
