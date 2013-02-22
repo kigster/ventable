@@ -173,5 +173,18 @@ describe Ventable do
       notified_observer.should be_true
       called_transaction.should be_true
     end
+
+    it "throws exception if :inside references unknown group" do
+      begin
+        TestEvent.configure do
+          notifies inside: :transaction do
+            # some stuff
+          end
+        end
+        fail "Shouldn't reach here, must throw a valid exception"
+      rescue Exception => e
+        e.class.should == Ventable::Error
+      end
+    end
   end
 end

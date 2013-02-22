@@ -1,6 +1,9 @@
 require 'set'
 
 module ::Ventable
+  class Error < RuntimeError
+  end
+
   module Event
     def self.included(klazz)
       klazz.instance_eval do
@@ -57,6 +60,9 @@ module ::Ventable
         observer_set = self.observers
         if options[:inside]
           observer_entry = self.find_observer_group(options[:inside])
+          if observer_entry.nil?
+            raise Ventable::Error.new("No group with name #{options[:inside]} found.")
+          end
           observer_set = observer_entry[:observers]
         end
         observer_list.each { |o| observer_set << o } unless observer_list.empty?

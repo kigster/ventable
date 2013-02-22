@@ -22,13 +22,13 @@ Or install it yourself as:
 
 ## Usage
 
-1. Create your own plain ruby class that optionally carries some data important to the event. Include module Ventable::Event.
+1. Create your own plain ruby Event class that optionally carries some data important to the event. Include module ```Ventable::Event```.
 2. Create one or more observers.  Observer can be any class that implements event handler method as a class method, such as a
    generic method ```self.handle_event(event)``` or a more specific method mapped to the event name: say for event UserRegistered the
    callback event would be ```self.handle_user_registered_event(event)```
 3. Register your observers with the event using ```notifies``` event method, or register groups using ```group``` method, and then
    use ```notify``` with options ```inside: :group_name```
-4. Instantiate your event (optionally with data), and call fire!() method.
+4. Instantiate your event class (optionally with some data), and call ```fire!``` method.
 
 ## Example
 
@@ -53,7 +53,6 @@ class SleepingPerson
     puts "snoozing at #{event.wakeup_time}"
     self.snooze(5)
   end
-  #.. implementation
 end
 
 # Register the observer
@@ -64,7 +63,6 @@ AlarmSoundEvent.new(Date.new).fire!
 ```
 
 ## Using #configure and groups
-
 
 Events can be configured to call observers in groups, with an optional block around it.
 
@@ -84,24 +82,51 @@ SomeEvent.configure do
   # first observer to be called
   notifies FirstObserverClassToBeCalled
 
-  # this group will be notified next
+  # any observers in this group will be notified next...
   group :transaction, &transaction
 
-  # this block is executed after the group
+  # this block will be run as the first member of the group
   notifies inside: :transaction do
     # perform block
   end
 
-  # these observers are run inside the transaction block
-  notifies ObserverClass1, ObserverClass2, inside: :transaction
 
-  # this one is the last to be notified
+  # this observer gets notified after all observers inside :transactions are notified
   notifies AnotherObserverClass
+
+  # these two observers are called at the end of the transaction group,
+  # but before AnotherObserverClass is notified.
+  notifies ObserverClass1, ObserverClass2, inside: :transaction
 end
 
 SomeEvent.new.fire!
-
 ```
+
+## Guidelines for Using Ventable with Rails
+
+You should start by defining your event library for your application (list of events
+that are important to you),  you can place these files anywhere you like, such as
+```lib/events``` or ```app/events```, etc.
+
+It is recommended to configure all events and observers in the ```event_initializer.rb``` file,
+inside the ```config/ininitalizers``` folder.
+
+When your event is tied to a creation of a "first class objects", such as user registration,
+it is recommended to create the User record first, commit it to the database, and then throw
+a ```ruby UserRegisteredEvent.new(user).fire!```, and have all subsequent logic broeken into
+their respective classes.  For example, if you need to send email to the user, have a ```Mailer```
+class observe the ```UserRegisteredEvent```, and so all the mailing logic can live in the ```Mailer```
+class, instead of, say, registration controller.  The callback method will receive the event, that
+wraps the User instance, or any other useful data necessary.
+
+## Further Discussion
+
+It is worth mentioning that in the current form this gem is simply a software design pattern.  It helps
+decouple code that performs tasks related to the same event (such as user registration, or comment posting),
+but unrelated to each other (such as sending email to the user).
+
+Future versions of this gem may offer a way to further decouple observers, by allowing them to be notified
+via a background queue, such as Sidekiq or Resque. If you are interested in helping, please email the author.
 
 ## Contributing
 
