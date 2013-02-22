@@ -24,8 +24,8 @@ Or install it yourself as:
 
 1. Create your own plain ruby Event class that optionally carries some data important to the event. Include module ```Ventable::Event```.
 2. Create one or more observers.  Observer can be any class that implements event handler method as a class method, such as a
-   generic method ```self.handle_event(event)``` or a more specific method mapped to the event name: say for event UserRegistered the
-   callback event would be ```self.handle_user_registered_event(event)```
+   generic method ```self.handle(event)``` or a more specific method mapped to the event name: say for event UserRegistered the
+   callback event would be ```self.handle_user_registered(event)```
 3. Register your observers with the event using ```notifies``` event method, or register groups using ```group``` method, and then
    use ```notify``` with options ```inside: :group_name```
 4. Instantiate your event class (optionally with some data), and call ```fire!``` method.
@@ -48,7 +48,7 @@ end
 
 # This class is an observer, interested in WakeUpEvents.
 class SleepingPerson
-  def self.handle_wake_up_event(event)
+  def self.handle_alarm_sound event
     self.wake_up
     puts "snoozing at #{event.wakeup_time}"
     self.snooze(5)
@@ -64,10 +64,10 @@ AlarmSoundEvent.new(Date.new).fire!
 
 ## Using #configure and groups
 
-Events can be configured to call observers in groups, with an optional block around it.
+Events can be configured to call observers in groups, with an optional block around it.  Using groups
+allows you (as in this example) wrap some observers in a transaction, and control the order of notification.
 
 ```ruby
-
 transaction = ->(b){
   ActiveRecord::Base.transaction do
     b.call
@@ -90,7 +90,6 @@ SomeEvent.configure do
     # perform block
   end
 
-
   # this observer gets notified after all observers inside :transactions are notified
   notifies AnotherObserverClass
 
@@ -109,9 +108,9 @@ using the following logic:
 
 1. If your event defines ```EventClass.ventable_callback_method_name``` method, it's return value is used as a method name.
 2. If not, your event's fully qualified class name is converted to a method name with underscrores. This method name
-   always ends with ```_event```.  For example, a class ```User::RegistrationEvent``` will generate callback
-   method name ```ObserverClass.handle_user__registration_event(event)``` (note that '::' is converted to two underscores).
-3. If neither method is found in the observer, a generic ```ObserverClass.handle_event(event)``` method is called.
+   always begings with ```handle_```.  For example, a class ```User::RegistrationEvent``` will generate callback
+   method name ```ObserverClass.handle_user__registration(event)``` (note that '::' is converted to two underscores).
+3. If neither method is found in the observer, a generic ```ObserverClass.handle(event)``` method is called.
 
 ## Guidelines for Using Ventable with Rails
 

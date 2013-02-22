@@ -88,7 +88,7 @@ module ::Ventable
           self.ventable_callback_method_name
         else
           target = self
-          method = "handle_" + target.name.gsub(/::/,'__').underscore.gsub(/_event/, '') + "_event"
+          method = "handle_" + target.name.gsub(/::/,'__').underscore.gsub(/_event/, '')
           method.to_sym
         end
       end
