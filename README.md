@@ -102,22 +102,33 @@ end
 SomeEvent.new.fire!
 ```
 
+## Callback Method Name
+
+When the observer is notified, Ventable library will call a class method on your observer, with the name determined
+using the following logic:
+
+1. If your event defines ```EventClass.ventable_callback_method_name``` method, it's return value is used as a method name.
+2. If not, your event's fully qualified class name is converted to a method name with underscrores. This method name
+   always ends with ```_event```.  For example, a class ```User::RegistrationEvent``` will generate callback
+   method name ```ObserverClass.handle_user__registration_event(event)``` (note that '::' is converted to two underscores).
+3. If neither method is found in the observer, a generic ```ObserverClass.handle_event(event)``` method is called.
+
 ## Guidelines for Using Ventable with Rails
 
 You should start by defining your event library for your application (list of events
 that are important to you),  you can place these files anywhere you like, such as
 ```lib/events``` or ```app/events```, etc.
 
-It is recommended to configure all events and observers in the ```event_initializer.rb``` file,
-inside the ```config/ininitalizers``` folder.
+It is recommended to ```configure``` all events and their observers in the ```event_initializer.rb``` file,
+inside the ```config/ininitalizers``` folder.  You may need to require your events in that file also.
 
 When your event is tied to a creation of a "first class objects", such as user registration,
 it is recommended to create the User record first, commit it to the database, and then throw
-a ```ruby UserRegisteredEvent.new(user).fire!```, and have all subsequent logic broeken into
-their respective classes.  For example, if you need to send email to the user, have a ```Mailer```
-class observe the ```UserRegisteredEvent```, and so all the mailing logic can live in the ```Mailer```
-class, instead of, say, registration controller.  The callback method will receive the event, that
-wraps the User instance, or any other useful data necessary.
+a ```UserRegisteredEvent.new(user).fire!```, and have all subsequent logic broeken into
+their respective classes.  For example, if you need to send an email to the user, have a ```Mailer```
+class observe the ```UserRegisteredEvent```, and so all the mailing logic can live inside the ```Mailer```
+class, instead of, say, registration controller directly calling ```Mailer.deliver_user_registration!(user)```.
+The callback method will receive the event, that wraps the User instance, or any other useful data necessary.
 
 ## Further Discussion
 
