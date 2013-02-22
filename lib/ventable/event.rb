@@ -76,10 +76,15 @@ module ::Ventable
         self.observers.find { |o| o.is_a?(Hash) && o[:name] == name }
       end
 
+      # Determine method name to call when notifying observers from this event.
       def default_callback_method
-        target = self
-        method = "handle_" + target.name.gsub(/::/,'__').underscore.gsub(/_event/, '') + "_event"
-        method.to_sym
+        if respond_to?(:ventable_callback_method_name)
+          self.ventable_callback_method_name
+        else
+          target = self
+          method = "handle_" + target.name.gsub(/::/,'__').underscore.gsub(/_event/, '') + "_event"
+          method.to_sym
+        end
       end
     end
   end
