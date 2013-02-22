@@ -132,7 +132,7 @@ describe Ventable do
 
     it "should properly set the callback method name" do
       SomeAwesomeEvent.default_callback_method.should == :handle_some_awesome_event
-      Blah::AnotherSweetEvent.default_callback_method.should == :handle_another_sweet_event
+      Blah::AnotherSweetEvent.default_callback_method.should == :handle_blah__another_sweet_event
       SomeOtherStuffHappened.default_callback_method.should == :handle_some_other_stuff_happened_event
     end
   end
