@@ -28,8 +28,10 @@ module ::Ventable
           around_block = observer_entry[:around_block]
           inside_block = -> { notify_observer_set(observer_entry[:observers]) }
           around_block.call(inside_block)
-        else
+        elsif observer_entry
           notify_observer(observer_entry)
+        else
+          raise Ventable::Error.new("nil in observer_entry set #{observer_set.inspect}!")
         end
       end
     end
@@ -44,9 +46,9 @@ module ::Ventable
     end
 
     def notify_class_observer(observer)
-      observer.respond_to?(self.class.default_callback_method) ?
-          observer.send(self.class.default_callback_method, self) :
-          observer.send(:handle_event, self)
+      return observer.send(self.class.default_callback_method, self) if observer.respond_to?(self.class.default_callback_method)
+      return observer.send(:handle_event, self) if observer.respond_to?(:handle_event)
+      raise Ventable::Error.new("suitable event handler method found in observer #{self.inspect}")
     end
 
     module ClassMethods
@@ -65,12 +67,14 @@ module ::Ventable
           end
           observer_set = observer_entry[:observers]
         end
-        observer_list.each { |o| observer_set << o } unless observer_list.empty?
+        raise Ventable::Error.new("found nil observer in params #{observer_list.inspect}") if observer_list.any?{|l| l.nil?}
+        observer_list.compact.each { |o| observer_set << o } unless observer_list.empty?
         observer_set << block if block
       end
 
       def group(name, &block)
-        raise "Group #{name} already defined by #{g}" if  find_observer_group(name)
+        g = find_observer_group(name)
+        raise "Group #{name} already defined by #{g}" if g
         self.observers <<
             { name: name,
               around_block: block,

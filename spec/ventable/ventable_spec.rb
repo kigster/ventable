@@ -188,5 +188,15 @@ describe Ventable do
         e.class.should == Ventable::Error
       end
     end
+    it "throws exception if nil observer added to the list" do
+      begin
+        TestEvent.configure do
+          notifies nil
+        end
+        fail "Shouldn't reach here, must throw a valid exception"
+      rescue Exception => e
+        e.class.should == Ventable::Error
+      end
+    end
   end
 end
