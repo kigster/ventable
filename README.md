@@ -138,6 +138,10 @@ but unrelated to each other (such as sending email to the user).
 Future versions of this gem may offer a way to further decouple observers, by allowing them to be notified
 via a background queue, such as Sidekiq or Resque. If you are interested in helping, please email the author.
 
+For more information, check out the following blog post:
+
+[Detangling Business Logic in Rails Apps with Pure Ruby Observers](http://building.wanelo.com/post/57442907639/detangling-business-logic-in-rails-apps-with-poro).
+
 ## Contributing
 
 1. Fork it
