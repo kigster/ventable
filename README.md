@@ -1,3 +1,4 @@
+[![Gem Version](https://badge.fury.io/rb/ventable.png)](http://badge.fury.io/rb/ventable)
 [![Build status](https://secure.travis-ci.org/kigster/ventable.png)](http://travis-ci.org/kigster/ventable)
 [![Code Climate](https://codeclimate.com/repos/52cf104f69568026cc0011a8/badges/4c29424a7e543aad9c1f/gpa.png)](https://codeclimate.com/repos/52cf104f69568026cc0011a8/feed)
 
