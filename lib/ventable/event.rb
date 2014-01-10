@@ -46,9 +46,10 @@ module ::Ventable
     end
 
     def notify_class_observer(observer)
-      return observer.send(self.class.default_callback_method, self) if observer.respond_to?(self.class.default_callback_method)
+      default_handler = self.class.default_callback_method
+      return observer.send(default_handler, self) if observer.respond_to?(default_handler)
       return observer.send(:handle_event, self) if observer.respond_to?(:handle_event)
-      raise Ventable::Error.new("suitable event handler method found in observer #{self.inspect}")
+      raise Ventable::Error.new("no suitable event handler method found for #{self.class} in observer #{observer} (try adding #{default_handler} to this observer)")
     end
 
     module ClassMethods
