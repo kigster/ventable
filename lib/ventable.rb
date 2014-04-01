@@ -2,6 +2,18 @@ require "ventable/version"
 require "ventable/event"
 
 module Ventable
+
+  def self.disable
+    @disabled = true
+  end
+
+  def self.enable
+    @disabled = false
+  end
+
+  def self.enabled?
+    @disabled != true
+  end
 end
 
 class String

@@ -17,7 +17,7 @@ module ::Ventable
     end
 
     def fire!
-      notify_observer_set(self.class.observers)
+      notify_observer_set(self.class.observers) if Ventable.enabled?
     end
 
     private

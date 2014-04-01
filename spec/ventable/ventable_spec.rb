@@ -7,6 +7,25 @@ describe Ventable do
     end
   end
 
+  describe '::enabled?' do
+    after { Ventable.enable }
+
+    it 'is true by default' do
+      expect(Ventable.enabled?).to be_true
+    end
+
+    it 'is false after Ventable is disabled' do
+      Ventable.disable
+      expect(Ventable.enabled?).to be_false
+    end
+
+    it 'is true after Ventable is re-enabled' do
+      Ventable.disable
+      Ventable.enable
+      expect(Ventable.enabled?).to be_true
+    end
+  end
+
   describe "including Ventable::Event" do
     it "should create a class instance variable to keep observers" do
       TestEvent.observers.should_not be_nil
@@ -112,6 +131,22 @@ describe Ventable do
 
       event_inside.should_not be_nil
       event_inside.should be_a(TestEvent)
+    end
+
+    context 'when globally disabled' do
+      before { Ventable.disable }
+      after { Ventable.enable }
+
+      it 'does not notify observers' do
+        observers_notified = false
+
+        TestEvent.notifies do |event|
+          observers_notified = true
+        end
+
+        TestEvent.new.fire!
+        expect(observers_notified).to be_false
+      end
     end
   end
 
