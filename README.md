@@ -132,6 +132,47 @@ class observe the ```UserRegisteredEvent```, and so all the mailing logic can li
 class, instead of, say, registration controller directly calling ```Mailer.deliver_user_registration!(user)```.
 The callback method will receive the event, that wraps the User instance, or any other useful data necessary.
 
+## Integration with tests
+
+There are times when it may be desirable to disable all eventing. For instance, when writing unit tests,
+testing that events are fired may be useful, but integrating with all observers adds complexity and confusion.
+In these cases, Ventable may be globally disabled.
+
+```ruby
+## in spec_helper
+
+around :each, eventing: false do |example|
+  Ventable.disable
+  example.run
+  Ventable.enable
+end
+```
+
+Now in a spec file:
+
+```ruby
+describe "Stuff", eventing: false do
+  it 'does stuff' do
+    ... my code that fires events, in isolation from event observers
+  end
+
+  it 'tests that events are fired, using stubs' do
+    event = double(fire!: true)
+    allow(MyEvent).to receive(:new).and_return(event)
+    ... my code that should fire event
+    expect(event).to have_received(:fire!)
+  end
+end
+
+describe 'Other stuff' do
+  it 'actually calls through to all observers, so valid data is required' do
+  end
+end
+```
+
+Note that in the version of RSpec that Ventable has been tested with, tags on a `describe` block
+override tags on an `it` block.
+
 ## Further Discussion
 
 It is worth mentioning that in the current form this gem is simply a software design pattern.  It helps
