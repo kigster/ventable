@@ -184,7 +184,7 @@ via a background queue, such as Sidekiq or Resque. If you are interested in help
 
 For more information, check out the following blog post:
 
-[Detangling Business Logic in Rails Apps with Pure Ruby Observers](http://building.wanelo.com/post/57442907639/detangling-business-logic-in-rails-apps-with-poro).
+[Detangling Business Logic in Rails Apps with Pure Ruby Observers](http://building.wanelo.com/2013/08/05/detangling-business-logic-in-rails-apps-with-poro-events-and-observers.html).
 
 ## Contributing
 
