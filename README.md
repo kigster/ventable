@@ -1,5 +1,5 @@
 
-[![Gem Version](https://badge.fury.io/rb/ventable.png)](http://badge.fury.io/rb/ventable)
+[![Gem Version](https://badge.fury.io/rb/ventable.png?1.0.0)](http://badge.fury.io/rb/ventable)
 [![Build status](https://secure.travis-ci.org/kigster/ventable.png)](http://travis-ci.org/kigster/ventable)
 [![Code Climate](https://codeclimate.com/github/kigster/ventable.png)](https://codeclimate.com/github/kigster/ventable)
 
