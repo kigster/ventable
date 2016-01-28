@@ -10,6 +10,15 @@ Simple eventing gem that implements Observable pattern, but with more options, a
 them in arbitrary blocks of code.  For example, when a certain event fires, some observers may be called within
 a transaction context, while others maybe called outside of the transaction context.
 
+## Ruby Version
+
+This gem works in the following ruby versions:
+
+ * MRI:
+   * 1.9.3-p551
+   * 2.2.3
+   * 2.3.0
+
 ## Installation
 
 Add this line to your application's Gemfile:
