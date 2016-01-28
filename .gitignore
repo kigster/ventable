@@ -5,6 +5,7 @@
 .yardoc
 InstalledFiles
 _yardoc
+Gemfile.lock
 coverage
 doc/
 lib/bundler/man
@@ -15,3 +16,4 @@ test/tmp
 test/version_tmp
 tmp
 .idea/
+vendor/
