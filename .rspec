@@ -1,2 +1,4 @@
 --color
 --format progress
+--backtrace
+-p 1

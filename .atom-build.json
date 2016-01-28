@@ -1,0 +1,10 @@
+{
+  "cmd": "eval \"$(rbenv init -)\"; bundle exec rspec",
+  "name": "Run All Specs",
+  "args": [ "-c", "-b", "-p 1", "--format progress"],
+  "sh": true,
+  "errorMatch": [
+    "rspec (?<file>[\\/0-9a-zA-Z\\._]+):(?<line>\\d+) #"
+  ],
+  "keymap": "cmd-2"
+}

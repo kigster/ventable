@@ -11,25 +11,25 @@ describe Ventable do
     after { Ventable.enable }
 
     it 'is true by default' do
-      expect(Ventable.enabled?).to be_true
+      expect(Ventable.enabled?).to be true
     end
 
     it 'is false after Ventable is disabled' do
       Ventable.disable
-      expect(Ventable.enabled?).to be_false
+      expect(Ventable.enabled?).to be false
     end
 
     it 'is true after Ventable is re-enabled' do
       Ventable.disable
       Ventable.enable
-      expect(Ventable.enabled?).to be_true
+      expect(Ventable.enabled?).to be true
     end
   end
 
   describe "including Ventable::Event" do
     it "should create a class instance variable to keep observers" do
-      TestEvent.observers.should_not be_nil
-      TestEvent.observers.should be_a(Set)
+      expect(TestEvent.observers).not_to be_nil
+      expect(TestEvent.observers.class.name).to eq("Set")
     end
 
     it "should see observers variable from instance methods" do
@@ -37,14 +37,14 @@ describe Ventable do
       TestEvent.new.instance_eval do
         observers = self.class.observers
       end
-      observers.should_not be_nil
+      expect(observers).to_not be_nil
     end
 
     it "should maintain separate sets of observers for each event" do
       class AnotherEvent
         include Ventable::Event
       end
-      AnotherEvent.observers.object_id.should_not == TestEvent.observers.object_id
+      expect(AnotherEvent.observers.object_id).to_not eq(TestEvent.observers.object_id)
     end
   end
 
@@ -62,38 +62,37 @@ describe Ventable do
         run_block = true
         event = e
       end
-      run_block.should_not be_true
-      event.should be_nil
+      expect(run_block).to eq(false)
+      expect(event).to be_nil
 
       # fire the event
       TestEvent.new.fire!
 
-      run_block.should be_true
-      event.should_not be_nil
+      expect(run_block).to be true
+      expect(event).not_to be_nil
     end
 
     it "should properly call a class observer" do
-      TestEvent.instance_eval do
+      class TestEvent
         class << self
           attr_accessor :flag
         end
-      end
-
-      TestEvent.class_eval do
-        def set_flag!
-          self.class.flag = true
+        self.flag = "unset"
+        def flag= value
+          self.class.flag = value
         end
       end
+
       class TestEventObserver
         def self.handle_test event
-          event.set_flag!
+          event.flag = "boo"
         end
       end
       TestEvent.notifies TestEventObserver
-      TestEvent.flag.should be_false
+      expect(TestEvent.flag).to eq("unset")
 
       TestEvent.new.fire!
-      TestEvent.flag.should be_true
+      expect(TestEvent.flag).to eq("boo")
     end
 
     it "should properly call a group of observers" do
@@ -118,19 +117,18 @@ describe Ventable do
         event_inside = event
       end
 
-      transaction_called.should be_false
-      transaction_already_completed.should be_false
-      observer_block_called.should be_false
+      expect(transaction_called).to be false
+      expect(transaction_already_completed).to be false
+      expect(observer_block_called).to be false
 
       TestEvent.new.fire!
 
-      transaction_called.should be_true
-      observer_block_called.should be_true
-      transaction_called.should be_true
-      transaction_already_completed.should be_false
-
-      event_inside.should_not be_nil
-      event_inside.should be_a(TestEvent)
+      expect(transaction_called).to be  true
+      expect(observer_block_called).to be  true
+      expect(transaction_called).to be  true
+      expect(transaction_already_completed).to be false
+      expect(event_inside).to_not be_nil
+      expect(event_inside).to be_a(TestEvent)
     end
 
     context 'when globally disabled' do
@@ -145,7 +143,7 @@ describe Ventable do
         end
 
         TestEvent.new.fire!
-        expect(observers_notified).to be_false
+        expect(observers_notified).to be false
       end
     end
   end
@@ -175,15 +173,15 @@ describe Ventable do
     end
 
     it "should properly set the callback method name" do
-      SomeAwesomeEvent.default_callback_method.should == :handle_some_awesome
-      Blah::AnotherSweetEvent.default_callback_method.should == :handle_blah__another_sweet
-      SomeOtherStuffHappened.default_callback_method.should == :handle_some_other_stuff_happened
-      ClassWithCustomCallbackMethodEvent.default_callback_method.should == :handle_my_special_event
+      expect(SomeAwesomeEvent.default_callback_method).to eq(:handle_some_awesome)
+      expect(Blah::AnotherSweetEvent.default_callback_method).to eq(:handle_blah__another_sweet)
+      expect(SomeOtherStuffHappened.default_callback_method).to eq(:handle_some_other_stuff_happened)
+      expect(ClassWithCustomCallbackMethodEvent.default_callback_method).to eq(:handle_my_special_event)
     end
   end
 
   describe "#configure" do
-    it "properly configures the event with observesrs" do
+    it "properly configures the event with observers" do
       notified_observer = false
       TestEvent.configure do
         notifies do
@@ -191,7 +189,7 @@ describe Ventable do
         end
       end
       TestEvent.new.fire!
-      notified_observer.should be_true
+      expect(notified_observer).to be true
     end
 
     it "configures observers with groups" do
@@ -207,8 +205,8 @@ describe Ventable do
         end
       end
       TestEvent.new.fire!
-      notified_observer.should be_true
-      called_transaction.should be_true
+      expect(notified_observer).to be true
+      expect(called_transaction).to be true
     end
 
     it "throws exception if :inside references unknown group" do
@@ -220,7 +218,7 @@ describe Ventable do
         end
         fail "Shouldn't reach here, must throw a valid exception"
       rescue Exception => e
-        e.class.should == Ventable::Error
+        expect(e.class).to eq(Ventable::Error)
       end
     end
     it "throws exception if nil observer added to the list" do
@@ -230,7 +228,7 @@ describe Ventable do
         end
         fail "Shouldn't reach here, must throw a valid exception"
       rescue Exception => e
-        e.class.should == Ventable::Error
+        expect(e.class).to eq(Ventable::Error)
       end
     end
   end
