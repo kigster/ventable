@@ -3,6 +3,7 @@
 [![Build status](https://secure.travis-ci.org/kigster/ventable.png)](http://travis-ci.org/kigster/ventable)
 [![Code Climate](https://codeclimate.com/github/kigster/ventable.png)](https://codeclimate.com/github/kigster/ventable)
 [![Downloads](http://ruby-gem-downloads-badge.herokuapp.com/ventable?type=total)](https://rubygems.org/gems/ventable)
+[![Gitter](https://img.shields.io/gitter/room/gitterHQ/gitter.svg)](https://gitter.im/kigster/ventable)
 
 
 # Ventable
