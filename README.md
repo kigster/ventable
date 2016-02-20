@@ -7,6 +7,8 @@
 
 # Ventable
 
+[![Join the chat at https://gitter.im/kigster/ventable](https://badges.gitter.im/kigster/ventable.svg)](https://gitter.im/kigster/ventable?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
 Simple eventing gem that implements Observable pattern, but with more options, ability to group observers and wrap
 them in arbitrary blocks of code.  For example, when a certain event fires, some observers may be called within
 a transaction context, while others maybe called outside of the transaction context.
