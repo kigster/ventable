@@ -38,10 +38,10 @@ module ::Ventable
 
     def notify_observer(observer)
       case observer
-        when Proc
-          observer.call(self)
-        else # class
-          notify_class_observer(observer)
+      when Proc
+        observer.call(self)
+      else # class
+        notify_class_observer(observer)
       end
     end
 
@@ -76,11 +76,11 @@ module ::Ventable
       def group(name, &block)
         g = find_observer_group(name)
         raise "Group #{name} already defined by #{g}" if g
-        self.observers <<
-            { name: name,
-              around_block: block,
-              observers: Set.new
-            }
+        self.observers << \
+        { name: name,
+          around_block: block,
+          observers: Set.new
+        }
       end
 
       def find_observer_group(name)
