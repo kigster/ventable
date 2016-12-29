@@ -5,22 +5,47 @@
 [![Downloads](http://ruby-gem-downloads-badge.herokuapp.com/ventable?type=total)](https://rubygems.org/gems/ventable)
 [![Gitter](https://img.shields.io/gitter/room/gitterHQ/gitter.svg)](https://gitter.im/kigster/ventable)
 
+<form action="https://www.paypal.com/cgi-bin/webscr" method="post" target="_top">
+<input type="hidden" name="cmd" value="_s-xclick">
+<input type="hidden" name="hosted_button_id" value="FSFYYNEQ8RKWU">
+<input type="image" src="https://camo.githubusercontent.com/d5d24e33e2f4b6fe53987419a21b203c03789a8f/68747470733a2f2f696d672e736869656c64732e696f2f62616467652f446f6e6174652d50617950616c2d677265656e2e737667" border="0" name="submit" alt="Donate to see this gem develop further">
+<img alt="" border="0" src="https://www.paypalobjects.com/en_US/i/scr/pixel.gif" width="1" height="1">
+</form>
 
 # Ventable
 
-Simple eventing gem that implements Observable pattern, but with more options, ability to group observers and wrap
-them in arbitrary blocks of code.  For example, when a certain event fires, some observers may be called within
-a transaction context, while others maybe called outside of the transaction context.
+This gem is a variation of the [Observer Design Pattern](https://en.wikipedia.org/wiki/Observer_pattern). 
+
+In particular: 
+
+ * Ventable requires creation of simple event classes that may contain application context, can be serialized, etc.
+ * Observers can be grouped together, and notified within a pre-defined `Proc`. For example, using grouping some observers may be called within the boundaries of a database transaction, while others maybe called outside of the transaction context.
+ * Ventable allows both compile time observer binding, and run-time.
+ * Ventable calls specific method on each observer, using automatically derived method name from the event class. A generic `#handle_event` method is also supported.
+
+Limitations:
+
+ * At the moment, Ventable notifies observers only within the current ruby process.
+ 
+## Plugins
+
+Ventable has several plugins that add various functionality on top of the basic event dispatch mechanism.
+
+ * [ventable-statsd](https://github.com/kigster/ventable-statsd) is an extension that allows notifying Statsd whenever an event occurs.
+ * [simple-feed](https://github.com/kigster/simple-feed) is an implementation of activity feeds on social networks, that integrates nicely with Ventable.
 
 ## Ruby Version
 
-This gem works in the following ruby versions:
+This gem has been verified to work in the following ruby versions:
 
- * MRI:
+ * MRI Ruby
    * 1.9.3-p551
-   * 2.2.3
-   * 2.3.0
+   * 2.2
+   * 2.3
+   * 2.4
 
+The gem also likely works with non-MRI rubies, but it has not been tested.
+    
 ## Installation
 
 Add this line to your application's Gemfile:
