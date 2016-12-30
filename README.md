@@ -18,23 +18,23 @@ This gem is a variation of the [Observer Design Pattern](https://en.wikipedia.or
 
 In particular: 
 
- * Ventable requires creation of simple event classes that may contain application context, can be serialized, etc.
- * Observers can be grouped together, and notified within a pre-defined `Proc`. For example, using grouping some observers may be called within the boundaries of a database transaction, while others maybe called outside of the transaction context.
- * Ventable allows both compile time observer binding, and run-time.
+ * Ventable requires creation of simple event classes that may carry data and be serialized.
+ * Observers can be grouped together, and notified within a pre-defined `Proc`. For example, using grouping some observers may be called within the boundaries of a database transaction, while others maybe called outside of it.
+ * Ventable allows both compile time and run time observer binding.
  * Ventable calls specific method on each observer, using automatically derived method name from the event class. A generic `#handle_event` method is also supported.
 
 Limitations:
 
- * At the moment, Ventable notifies observers only within the current ruby process.
+ * At the moment, Ventable can only notify observers within the current ruby process.
  
 ## Plugins
 
 Ventable has several plugins that add various functionality on top of the basic event dispatch mechanism.
 
  * [ventable-statsd](https://github.com/kigster/ventable-statsd) is an extension that allows notifying Statsd whenever an event occurs.
- * [simple-feed](https://github.com/kigster/simple-feed) is an implementation of activity feeds on social networks, that integrates nicely with Ventable.
+ * [simple-feed](https://github.com/kigster/simple-feed) is a generic implementation of the activity feed concept commonly seen on social networks,  and it integrates nicely with Ventable.
 
-## Ruby Version
+## Ruby Versions
 
 This gem has been verified to work in the following ruby versions:
 
