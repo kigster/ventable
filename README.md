@@ -5,12 +5,8 @@
 [![Downloads](http://ruby-gem-downloads-badge.herokuapp.com/ventable?type=total)](https://rubygems.org/gems/ventable)
 [![Gitter](https://img.shields.io/gitter/room/gitterHQ/gitter.svg)](https://gitter.im/kigster/ventable)
 
-<form action="https://www.paypal.com/cgi-bin/webscr" method="post" target="_top">
-<input type="hidden" name="cmd" value="_s-xclick">
-<input type="hidden" name="hosted_button_id" value="FSFYYNEQ8RKWU">
-<input type="image" src="https://camo.githubusercontent.com/d5d24e33e2f4b6fe53987419a21b203c03789a8f/68747470733a2f2f696d672e736869656c64732e696f2f62616467652f446f6e6174652d50617950616c2d677265656e2e737667" border="0" name="submit" alt="Donate to see this gem develop further">
-<img alt="" border="0" src="https://www.paypalobjects.com/en_US/i/scr/pixel.gif" width="1" height="1">
-</form>
+[![Test Coverage](https://api.codeclimate.com/v1/badges/c28d141c978293886d21/test_coverage)](https://codeclimate.com/github/kigster/ventable/test_coverage)
+
 
 # Ventable
 
