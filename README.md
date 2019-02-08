@@ -58,13 +58,16 @@ Or install it yourself as:
 
 ## Usage
 
-1. Create your own plain ruby Event class that optionally carries some data important to the event. Include module ```Ventable::Event```.
+1. Create your own plain ruby Event class that optionally carries some data important to the event. Include module `Ventable::Event`.
+
 2. Create one or more observers.  Observer can be any class that implements event handler method as a class method, such as a
-   generic method ```self.handle(event)``` or a more specific method mapped to the event name: say for event UserRegistered the
-   callback event would be ```self.handle_user_registered(event)```
-3. Register your observers with the event using ```notifies``` event method, or register groups using ```group``` method, and then
-   use ```notify``` with options ```inside: :group_name```
-4. Instantiate your event class (optionally with some data), and call ```fire!``` method.
+   generic method `self.handle(event)` or a more specific method mapped to the event name: say for event UserRegistered the
+   callback event would be `self.handle_user_registered(event)`
+
+3. Register your observers with the event using `notifies` event method, or register groups using `group` method, and then
+   use `notify` with options `inside: :group_name`
+
+4. Instantiate your event class (optionally with some data), and call `publish` or, a deprecated `fire!` method.
 
 ## Example
 
@@ -95,7 +98,7 @@ end
 AlarmSoundEvent.notifies SleepingPerson
 
 # Create and fire the event
-AlarmSoundEvent.new(Date.new).fire!
+AlarmSoundEvent.new(Date.new).publish
 ```
 
 ## Using #configure and groups
@@ -134,7 +137,7 @@ SomeEvent.configure do
   notifies ObserverClass1, ObserverClass2, inside: :transaction
 end
 
-SomeEvent.new.fire!
+SomeEvent.new.publish
 ```
 
 ## Callback Method Name
@@ -152,23 +155,23 @@ using the following logic:
 
 You should start by defining your event library for your application (list of events
 that are important to you),  you can place these files anywhere you like, such as
-```lib/events``` or ```app/events```, etc.
+`lib/events` or `app/events`, etc.
 
-It is recommended to ```configure``` all events and their observers in the ```event_initializer.rb``` file,
-inside the ```config/ininitalizers``` folder.  You may need to require your events in that file also.
+It is recommended to `configure` all events and their observers in the `event_initializer.rb` file,
+inside the `config/ininitalizers` folder.  You may need to require your events in that file also.
 
 When your event is tied to a creation of a "first class objects", such as user registration,
 it is recommended to create the User record first, commit it to the database, and then throw
-a ```UserRegisteredEvent.new(user).fire!```, and have all subsequent logic broeken into
-their respective classes.  For example, if you need to send an email to the user, have a ```Mailer```
-class observe the ```UserRegisteredEvent```, and so all the mailing logic can live inside the ```Mailer```
-class, instead of, say, registration controller directly calling ```Mailer.deliver_user_registration!(user)```.
+a `UserRegisteredEvent.new(user).publish`, and have all subsequent logic broeken into
+their respective classes.  For example, if you need to send an email to the user, have a `Mailer`
+class observe the `UserRegisteredEvent`, and so all the mailing logic can live inside the `Mailer`
+class, instead of, say, registration controller directly calling `Mailer.deliver_user_registration!(user)`.
 The callback method will receive the event, that wraps the User instance, or any other useful data necessary.
 
 ## Integration with tests
 
 There are times when it may be desirable to disable all eventing. For instance, when writing unit tests,
-testing that events are fired may be useful, but integrating with all observers adds complexity and confusion.
+testing that events are published may be useful, but integrating with all observers adds complexity and confusion.
 In these cases, Ventable may be globally disabled.
 
 ```ruby
@@ -186,14 +189,14 @@ Now in a spec file:
 ```ruby
 describe "Stuff", eventing: false do
   it 'does stuff' do
-    ... my code that fires events, in isolation from event observers
+    ... my code that publishes events, in isolation from event observers
   end
 
-  it 'tests that events are fired, using stubs' do
-    event = double(fire!: true)
+  it 'tests that events are published, using stubs' do
+    event = double(publish: true)
     allow(MyEvent).to receive(:new).and_return(event)
     ... my code that should fire event
-    expect(event).to have_received(:fire!)
+    expect(event).to have_received(:publish)
   end
 end
 
