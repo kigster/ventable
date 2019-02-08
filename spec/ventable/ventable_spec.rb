@@ -1,4 +1,4 @@
-require 'ventable'
+require 'spec_helper'
 
 describe Ventable do
   before do
@@ -26,13 +26,13 @@ describe Ventable do
     end
   end
 
-  describe "including Ventable::Event" do
-    it "should create a class instance variable to keep observers" do
+  describe 'including Ventable::Event' do
+    it 'should create a class instance variable to keep observers' do
       expect(TestEvent.observers).not_to be_nil
-      expect(TestEvent.observers.class.name).to eq("Set")
+      expect(TestEvent.observers.class.name).to eq('Set')
     end
 
-    it "should see observers variable from instance methods" do
+    it 'should see observers variable from instance methods' do
       observers = nil
       TestEvent.new.instance_eval do
         observers = self.class.observers
@@ -40,7 +40,7 @@ describe Ventable do
       expect(observers).to_not be_nil
     end
 
-    it "should maintain separate sets of observers for each event" do
+    it 'should maintain separate sets of observers for each event' do
       class AnotherEvent
         include Ventable::Event
       end
@@ -48,19 +48,19 @@ describe Ventable do
     end
   end
 
-  describe "#fire" do
+  describe '#fire' do
     before do
       class TestEvent
         include Ventable::Event
       end
     end
 
-    it "should properly call a Proc observer" do
+    it 'should properly call a Proc observer' do
       run_block = false
-      event = nil
+      event     = nil
       TestEvent.notifies do |e|
         run_block = true
-        event = e
+        event     = e
       end
       expect(run_block).to eq(false)
       expect(event).to be_nil
@@ -72,33 +72,69 @@ describe Ventable do
       expect(event).not_to be_nil
     end
 
-    it "should properly call a class observer" do
-      class TestEvent
-        class << self
-          attr_accessor :flag
+    describe 'class observer' do
+      before do
+        class TestEvent
+          class << self
+            attr_accessor :flag
+          end
+
+          self.flag = 'unset'
+
+          def flag=(value)
+            self.class.flag = value
+          end
         end
-        self.flag = "unset"
-        def flag= value
-          self.class.flag = value
+
+        class TestEventObserver
+          def self.handle_test(event)
+            event.flag = 'boo'
+          end
         end
+
+        class GlobalObserver
+          class << self
+            def handle_event(event)
+              puts event.inspect
+            end
+          end
+        end
+
+        TestEvent.notifies TestEventObserver, GlobalObserver
       end
 
-      class TestEventObserver
-        def self.handle_test event
-          event.flag = "boo"
+      let(:event) { TestEvent.new }
+
+      before do
+        expect(TestEvent.flag).to eq('unset')
+        expect(GlobalObserver).to receive(:handle_event).with(event)
+      end
+
+      it 'should set the flag and call observers' do
+        event.fire!
+        expect(TestEvent.flag).to eq('boo')
+      end
+
+      it 'should also fire via the publish alias' do
+        event.publish
+      end
+
+      context 'observer without a handler' do
+        before {
+          class ObserverWithoutAHandler
+          end
+          TestEvent.notifies ObserverWithoutAHandler
+        }
+        it 'should raise an exception' do
+          expect { event.publish }.to raise_error(Ventable::Error)
         end
       end
-      TestEvent.notifies TestEventObserver
-      expect(TestEvent.flag).to eq("unset")
-
-      TestEvent.new.fire!
-      expect(TestEvent.flag).to eq("boo")
     end
 
-    it "should properly call a group of observers" do
-      transaction_called = false
+    it 'should properly call a group of observers' do
+      transaction_called    = false
       transaction_completed = false
-      transaction = ->(observer_block) {
+      transaction           = ->(observer_block) {
         transaction_called = true
         observer_block.call
         transaction_completed = true
@@ -110,11 +146,11 @@ describe Ventable do
       # this flag ensures that this block really runs inside
       # the transaction group block
       transaction_already_completed = false
-      event_inside = nil
+      event_inside                  = nil
       TestEvent.notifies inside: :transaction do |event|
-        observer_block_called = true
+        observer_block_called         = true
         transaction_already_completed = transaction_completed
-        event_inside = event
+        event_inside                  = event
       end
 
       expect(transaction_called).to be false
@@ -123,9 +159,9 @@ describe Ventable do
 
       TestEvent.new.fire!
 
-      expect(transaction_called).to be  true
-      expect(observer_block_called).to be  true
-      expect(transaction_called).to be  true
+      expect(transaction_called).to be true
+      expect(observer_block_called).to be true
+      expect(transaction_called).to be true
       expect(transaction_already_completed).to be false
       expect(event_inside).to_not be_nil
       expect(event_inside).to be_a(TestEvent)
@@ -148,7 +184,7 @@ describe Ventable do
     end
   end
 
-  describe "#default_callback_method" do
+  describe '#default_callback_method' do
     before do
       class SomeAwesomeEvent
         include Ventable::Event
@@ -163,6 +199,7 @@ describe Ventable do
       class SomeOtherStuffHappened
         include Ventable::Event
       end
+
       class ClassWithCustomCallbackMethodEvent
         include Ventable::Event
 
@@ -172,16 +209,16 @@ describe Ventable do
       end
     end
 
-    it "should properly set the callback method name" do
-      expect(SomeAwesomeEvent.default_callback_method).to eq(:handle_some_awesome)
-      expect(Blah::AnotherSweetEvent.default_callback_method).to eq(:handle_blah__another_sweet)
-      expect(SomeOtherStuffHappened.default_callback_method).to eq(:handle_some_other_stuff_happened)
-      expect(ClassWithCustomCallbackMethodEvent.default_callback_method).to eq(:handle_my_special_event)
+    it 'should properly set the callback method name' do
+      expect(SomeAwesomeEvent.send(:default_callback_method)).to eq(:handle_some_awesome)
+      expect(Blah::AnotherSweetEvent.send(:default_callback_method)).to eq(:handle_blah__another_sweet)
+      expect(SomeOtherStuffHappened.send(:default_callback_method)).to eq(:handle_some_other_stuff_happened)
+      expect(ClassWithCustomCallbackMethodEvent.send(:default_callback_method)).to eq(:handle_my_special_event)
     end
   end
 
-  describe "#configure" do
-    it "properly configures the event with observers" do
+  describe '#configure' do
+    it 'properly configures the event with observers' do
       notified_observer = false
       TestEvent.configure do
         notifies do
@@ -192,11 +229,11 @@ describe Ventable do
       expect(notified_observer).to be true
     end
 
-    it "configures observers with groups" do
-      notified_observer = false
+    it 'configures observers with groups' do
+      notified_observer  = false
       called_transaction = false
       TestEvent.configure do
-        group :transaction, &->(b){
+        group :transaction, &->(b) {
           b.call
           called_transaction = true
         }
@@ -209,24 +246,24 @@ describe Ventable do
       expect(called_transaction).to be true
     end
 
-    it "throws exception if :inside references unknown group" do
+    it 'throws exception if :inside references unknown group' do
       begin
         TestEvent.configure do
           notifies inside: :transaction do
             # some stuff
           end
         end
-        fail "Shouldn't reach here, must throw a valid exception"
+        fail 'Shouldn\'t reach here, must throw a valid exception'
       rescue Exception => e
         expect(e.class).to eq(Ventable::Error)
       end
     end
-    it "throws exception if nil observer added to the list" do
+    it 'throws exception if nil observer added to the list' do
       begin
         TestEvent.configure do
           notifies nil
         end
-        fail "Shouldn't reach here, must throw a valid exception"
+        fail 'Shouldn\'t reach here, must throw a valid exception'
       rescue Exception => e
         expect(e.class).to eq(Ventable::Error)
       end
