@@ -2,57 +2,48 @@ require 'set'
 
 module ::Ventable
   module Event
+
     module InstanceMethods
-      def fire(*args, **opts, &block)
-        if Ventable.enabled?
-          notify_observer_set(self.class.observers, *args, **opts, &block)
-        else
-          true
+      def publish
+        return unless Ventable.enabled?
+        Event.queue << self
+      rescue StandardError => e
+        raise Errors::EventPublishingError.new(self, e)
+      end
+
+      alias fire publish
+
+      def publish_synchronously(&block)
+        return unless Ventable.enabled?
+        observers.each do |observer|
+          notify_observer(observer, self, &block)
         end
       end
 
-      def fire!(*args, **opts, &block)
-        fire(*args, **opts, &block).tap do |result|
-          raise Errors::FireError, 'Error'
-        end
+      def observers
+        self.class.observers
       end
 
-      alias publish fire
+      def my_event_name
+        self.class.event_name
+      end
+
+      def my_event_symbol
+        self.class.event_symbol
+      end
 
       private
 
-      def notify_observer_set(observer_set, *args, **opts, &block)
-        observer_set.each do |observer_entry|
-          if observer_entry.is_a?(Hash)
-            around_block = observer_entry[:around_block]
-            inside_block = -> { notify_observer_set(observer_entry[:observers]) }
-            around_block.call(inside_block)
-          else
-            notify_observer(observer_entry, *args, **opts, &block)
-          end
-        end
-      end
-
-      def notify_observer(observer, *args, **opts, &block)
-        arguments = [observer, *args].compact
+      def notify_observer(observer, event, &block)
         case observer
         when Proc
-          observer.call(*arguments, **opts, &block)
-        else # class
-          notify_class_observer(observer, *args, **opts, &block)
+          observer.call(event, &block)
+        else
+          method = self.class.callback_for(observer)
+          observer.send(method, event, &block)
         end
-      end
-
-      def notify_class_observer(observer, *args, **opts, &block)
-        method = event_callback_method(observer)
-        raise(Ventable::Error.new("no suitable event handler method found for #{self.class} in observer #{observer}")) if method.nil?
-        observer.send(method, self, *args, **opts, &block)
-      end
-
-      def event_callback_method(observer)
-        self.class.send(:default_callback_methods).select do |method_name|
-          observer.respond_to?(method_name)
-        end
+      rescue StandardError => e
+        raise Errors::EventPublishingError.new(self, observer, e)
       end
     end
   end

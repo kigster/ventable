@@ -1,22 +1,14 @@
 module Ventable
-  module Event
-    class Observer
-      attr_reader :target
-
-      def initialize(target)
-        @target = target
-      end
-    end
-
-    class ObserverGroup < Observer
-      attr_reader :observers
-
-      def initialize(*args, &block)
-        @observers = Set.new
-        args.each do |arg|
-          @observers << Observer.new(arg)
+  module Observer
+    def self.included(base)
+      base.instance_eval do
+        class << self
+          def observe(*event_names)
+            event_names.each do |event_name|
+              Ventable::Event.send(event_name).notifies(self)
+            end
+          end
         end
-        @observers << Observer.new(block) if block
       end
     end
   end

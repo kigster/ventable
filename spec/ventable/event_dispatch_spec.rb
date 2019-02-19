@@ -211,6 +211,23 @@
 #       expect(notified_observer).to be true
 #     end
 #
+#     it 'configures observers with groups' do
+#       notified_observer  = false
+#       called_transaction = false
+#       TestEvent.configure do
+#         group :transaction, &->(b) {
+#           b.call
+#           called_transaction = true
+#         }
+#         notifies inside: :transaction do
+#           notified_observer = true
+#         end
+#       end
+#       TestEvent.new.publish
+#       expect(notified_observer).to be true
+#       expect(called_transaction).to be true
+#     end
+#
 #     it 'throws exception if :inside references unknown group' do
 #       begin
 #         TestEvent.configure do

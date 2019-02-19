@@ -15,6 +15,9 @@ Gem::Specification.new do |gem|
   gem.require_paths = ['lib']
   gem.version       = Ventable::VERSION
 
+  gem.add_dependency 'logger'
+  gem.add_dependency 'colored2'
+  
   gem.add_development_dependency 'rake'
   gem.add_development_dependency 'simplecov'
   gem.add_development_dependency 'rspec'

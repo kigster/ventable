@@ -3,65 +3,79 @@ require 'set'
 module Ventable
   module Event
     module ClassMethods
-      def configure(&block)
-        class_eval(&block)
+
+      def event(**opts, &block)
+        abstract_event if opts[:abstract]
+        event_name(opts[:name]) if opts[:name]
+        event_symbol(opts[:symbol]) if opts[:symbol]
+        notifies(opts[:notifies], &block) if opts[:notifies]
       end
 
-      def notifies(*observer_list, inside: nil, **opts, &block)
-        observer_set = if inside
-                         find_observer_group(groups)&.observers
-                       else
-                         observers
-                       end
-
-        raise Ventable::Error.new("found nil observer in params #{observer_list.inspect}") if observer_list.any?(&:nil?)
-        observer_list.compact.each { |o| observer_set << o } unless observer_list.empty?
-        observer_set << block if block
-      end
-
-      def group(name, &block)
-        self.observers << Observer.new(name, Set.new, block)
+      def default_event_name
+        short_class_name(strip_module: true)
       end
 
       def event_name(name = nil)
-        if name
-          new_name = name.to_sym
-          if @event_name && @event_name != new_name
-            Event.event_hash.delete(@event_name)
-            @event_name = new_name
-          end
-          Event.event_hash[@event_name] = self
-        else
-          @event_name ||= ('publish_' + short_class_name + '_event').to_sym
+        name = name[] if name.is_a?(Proc)
+        name = name.to_sym if name
+
+        return @event_name if @event_name && name.nil?
+
+        if @event_name && name && @event_name != name
+          Event.deregister(@event_name)
+          @default_callback_methods = nil
         end
 
-        @event_name
+        @event_name = name ? name : (short_class_name + '_event').to_sym
+        Event.register(@event_name, self)
       end
 
-      protected
+      alias event_name= event_name
 
-      def find_observer_group(name)
-        observers.find { |o| o.name == name }.tap do |result|
-          raise Ventable::Errors::MissingGroupError.new(name) if result.nil?
-        end
+      def notifies(*observer_list, &block)
+        observer_list.compact!
+        observers.merge(observer_list)
+        observers << block if block
       end
 
-      def short_class_name
-        @short_class_name ||= (respond_to?(:name) ? name : self.class.name).gsub(/::/, '.').underscore.gsub(/_event$/, '')
+      def event_symbol(val = nil)
+        @event_symbol ||= val
+      end
+
+      alias event_symbol= event_symbol
+
+      def callback_for(observer)
+        default_callback_methods.find { |m| observer.respond_to?(m) }
       end
 
       private
 
+      def abstract_event
+        Event.deregister(event_name)
+        @event_name = nil
+      end
+
+      def short_class_name(strip_module: true)
+        @short_class_name ||= begin
+          class_name = respond_to?(:name) ? name : self.class.name
+          strip_module ?
+            class_name.gsub(/.*::/, '').underscore.gsub(/_event$/, '') :
+            class_name.gsub(/::/, '__').underscore.gsub(/_event$/, '')
+        end
+      end
+
       # Determine method name to call when notifying observers from this event.
       def default_callback_methods
-        if respond_to?(:ventable_event_name)
-          Array(ventable_event_name)
-        else
-          ['handle_' + self.short_class_name,
-           short_class_name,
-           short_class_name + '_event',
-           'handle_event'].map(&:to_sym)
-        end
+        @default_callback_methods ||= [
+          event_name,
+          "#{event_name}_event",
+          "handle_#{event_name}",
+          "handle_#{event_name}_event",
+          "process_#{event_name}",
+          "receive_#{event_name}",
+          'handle_event',
+          'process_event',
+        ].map(&:to_sym)
       end
     end
   end

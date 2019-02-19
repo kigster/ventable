@@ -2,17 +2,20 @@ require 'ventable/version'
 require 'ventable/errors'
 require 'ventable/observer'
 require 'ventable/event'
-require 'ventable/publisher'
+require 'ventable/broadcaster'
+require 'ventable/async_processor'
 require 'extensions'
 
 module Ventable
-  @enabled = true
+  @enabled         ||= true
+  @logger          ||= Logger.new(STDOUT)
+  @async_processor ||= AsyncEventProcessor.new
 
   class << self
-    attr_accessor :enabled
+    attr_accessor :enabled, :logger, :async_processor
 
-    def event(name)
-      search_event(name.to_sym)
+    def configure(&block)
+      class_eval(&block)
     end
 
     def disable!
@@ -23,19 +26,14 @@ module Ventable
       self.enabled = true
     end
 
+    def shutdown!
+      async_processor.shutdown!
+    end
+
     alias enabled? enabled
 
     def disabled?
       !enabled?
-    end
-
-    private
-
-    def search_event(name)
-      event_from_hash = ::Ventable::Event.event_hash[name]
-      (event_from_hash || ::Ventable::Event.event_set.select { |e| e.event_name == name }).tap do |event_from_set|
-        ::Ventable::Event.event_hash[name] = event_from_set if event_from_set && event_from_hash.nil?
-      end
     end
   end
 end
