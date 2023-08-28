@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'spec_helper'
 
 describe Ventable do
@@ -8,43 +10,43 @@ describe Ventable do
   end
 
   describe '::enabled?' do
-    after { Ventable.enable }
+    after { described_class.enable }
 
     it 'is true by default' do
-      expect(Ventable.enabled?).to be true
+      expect(described_class.enabled?).to be true
     end
 
     it 'is false after Ventable is disabled' do
-      Ventable.disable
-      expect(Ventable.enabled?).to be false
+      described_class.disable
+      expect(described_class.enabled?).to be false
     end
 
     it 'is true after Ventable is re-enabled' do
-      Ventable.disable
-      Ventable.enable
-      expect(Ventable.enabled?).to be true
+      described_class.disable
+      described_class.enable
+      expect(described_class.enabled?).to be true
     end
   end
 
   describe 'including Ventable::Event' do
-    it 'should create a class instance variable to keep observers' do
+    it 'creates a class instance variable to keep observers' do
       expect(TestEvent.observers).not_to be_nil
       expect(TestEvent.observers.class.name).to eq('Set')
     end
 
-    it 'should see observers variable from instance methods' do
+    it 'sees observers variable from instance methods' do
       observers = nil
       TestEvent.new.instance_eval do
         observers = self.class.observers
       end
-      expect(observers).to_not be_nil
+      expect(observers).not_to be_nil
     end
 
-    it 'should maintain separate sets of observers for each event' do
+    it 'maintains separate sets of observers for each event' do
       class AnotherEvent
         include Ventable::Event
       end
-      expect(AnotherEvent.observers.object_id).to_not eq(TestEvent.observers.object_id)
+      expect(AnotherEvent.observers.object_id).not_to eq(TestEvent.observers.object_id)
     end
   end
 
@@ -55,14 +57,14 @@ describe Ventable do
       end
     end
 
-    it 'should properly call a Proc observer' do
+    it 'properlies call a Proc observer' do
       run_block = false
       event     = nil
       TestEvent.notifies do |e|
         run_block = true
         event     = e
       end
-      expect(run_block).to eq(false)
+      expect(run_block).to be(false)
       expect(event).to be_nil
 
       # fire the event
@@ -101,21 +103,18 @@ describe Ventable do
         end
 
         TestEvent.notifies TestEventObserver, GlobalObserver
-      end
-
-      let(:event) { TestEvent.new }
-
-      before do
         expect(TestEvent.flag).to eq('unset')
         expect(GlobalObserver).to receive(:handle_event).with(event)
       end
 
-      it 'should set the flag and call observers' do
+      let(:event) { TestEvent.new }
+
+      it 'sets the flag and call observers' do
         event.fire!
         expect(TestEvent.flag).to eq('boo')
       end
 
-      it 'should also fire via the publish alias' do
+      it 'alsoes fire via the publish alias' do
         event.publish
       end
 
@@ -125,13 +124,14 @@ describe Ventable do
           end
           TestEvent.notifies ObserverWithoutAHandler
         }
-        it 'should raise an exception' do
+
+        it 'raises an exception' do
           expect { event.publish }.to raise_error(Ventable::Error)
         end
       end
     end
 
-    it 'should properly call a group of observers' do
+    it 'properlies call a group of observers' do
       transaction_called    = false
       transaction_completed = false
       transaction           = ->(observer_block) {
@@ -163,18 +163,18 @@ describe Ventable do
       expect(observer_block_called).to be true
       expect(transaction_called).to be true
       expect(transaction_already_completed).to be false
-      expect(event_inside).to_not be_nil
+      expect(event_inside).not_to be_nil
       expect(event_inside).to be_a(TestEvent)
     end
 
     context 'when globally disabled' do
-      before { Ventable.disable }
-      after { Ventable.enable }
+      before { described_class.disable }
+      after { described_class.enable }
 
       it 'does not notify observers' do
         observers_notified = false
 
-        TestEvent.notifies do |event|
+        TestEvent.notifies do |_event|
           observers_notified = true
         end
 
@@ -209,7 +209,7 @@ describe Ventable do
       end
     end
 
-    it 'should properly set the callback method name' do
+    it 'properlies set the callback method name' do
       expect(SomeAwesomeEvent.send(:default_callback_method)).to eq(:handle_some_awesome)
       expect(Blah::AnotherSweetEvent.send(:default_callback_method)).to eq(:handle_blah__another_sweet)
       expect(SomeOtherStuffHappened.send(:default_callback_method)).to eq(:handle_some_other_stuff_happened)
@@ -247,26 +247,23 @@ describe Ventable do
     end
 
     it 'throws exception if :inside references unknown group' do
-      begin
-        TestEvent.configure do
-          notifies inside: :transaction do
-            # some stuff
-          end
+      TestEvent.configure do
+        notifies inside: :transaction do
+          # some stuff
         end
-        fail 'Shouldn\'t reach here, must throw a valid exception'
-      rescue Exception => e
-        expect(e.class).to eq(Ventable::Error)
       end
+      fail 'Shouldn\'t reach here, must throw a valid exception'
+    rescue Exception => e
+      expect(e.class).to eq(Ventable::Error)
     end
+
     it 'throws exception if nil observer added to the list' do
-      begin
-        TestEvent.configure do
-          notifies nil
-        end
-        fail 'Shouldn\'t reach here, must throw a valid exception'
-      rescue Exception => e
-        expect(e.class).to eq(Ventable::Error)
+      TestEvent.configure do
+        notifies nil
       end
+      fail 'Shouldn\'t reach here, must throw a valid exception'
+    rescue Exception => e
+      expect(e.class).to eq(Ventable::Error)
     end
   end
 end
