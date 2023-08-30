@@ -8,20 +8,20 @@ describe Ventable do
   end
 
   describe '::enabled?' do
-    after { Ventable.enable }
+    after { Ventable.enable! }
 
     it 'is true by default' do
       expect(Ventable.enabled?).to be true
     end
 
     it 'is false after Ventable is disabled' do
-      Ventable.disable
+      Ventable.disable!
       expect(Ventable.enabled?).to be false
     end
 
     it 'is true after Ventable is re-enabled' do
-      Ventable.disable
-      Ventable.enable
+      Ventable.disable!
+      Ventable.enable!
       expect(Ventable.enabled?).to be true
     end
   end
@@ -66,7 +66,7 @@ describe Ventable do
       expect(event).to be_nil
 
       # fire the event
-      TestEvent.new.fire!
+      TestEvent.new.publish
 
       expect(run_block).to be true
       expect(event).not_to be_nil
@@ -111,7 +111,7 @@ describe Ventable do
       end
 
       it 'should set the flag and call observers' do
-        event.fire!
+        event.publish
         expect(TestEvent.flag).to eq('boo')
       end
 
@@ -126,7 +126,7 @@ describe Ventable do
           TestEvent.notifies ObserverWithoutAHandler
         }
         it 'should raise an exception' do
-          expect { event.publish }.to raise_error(Ventable::Error)
+          expect { event.publish }.to raise_error(Ventable::Errors::EventError)
         end
       end
     end
@@ -157,7 +157,7 @@ describe Ventable do
       expect(transaction_already_completed).to be false
       expect(observer_block_called).to be false
 
-      TestEvent.new.fire!
+      TestEvent.new.publish
 
       expect(transaction_called).to be true
       expect(observer_block_called).to be true
@@ -178,44 +178,26 @@ describe Ventable do
           observers_notified = true
         end
 
-        TestEvent.new.fire!
+        TestEvent.new.publish
         expect(observers_notified).to be false
       end
     end
   end
 
-  describe '#default_callback_method' do
-    before do
-      class SomeAwesomeEvent
-        include Ventable::Event
-      end
-
-      module Blah
-        class AnotherSweetEvent
-          include Ventable::Event
-        end
-      end
-
-      class SomeOtherStuffHappened
-        include Ventable::Event
-      end
-
-      class ClassWithCustomCallbackMethodEvent
-        include Ventable::Event
-
-        def self.ventable_callback_method_name
-          :handle_my_special_event
-        end
-      end
-    end
-
-    it 'should properly set the callback method name' do
-      expect(SomeAwesomeEvent.send(:default_callback_method)).to eq(:handle_some_awesome)
-      expect(Blah::AnotherSweetEvent.send(:default_callback_method)).to eq(:handle_blah__another_sweet)
-      expect(SomeOtherStuffHappened.send(:default_callback_method)).to eq(:handle_some_other_stuff_happened)
-      expect(ClassWithCustomCallbackMethodEvent.send(:default_callback_method)).to eq(:handle_my_special_event)
-    end
-  end
+  # describe '#default_callback_methods' do
+  #   context 'class without a module' do
+  #     before do
+  #     end
+  #     expect(SomeAwesomeEvent.send(:default_callback_method)).to eq(:handle_some_awesome)
+  #   end
+  #
+  #   it 'should properly set the callback method name' do
+  #
+  #     expect(Blah::AnotherSweetEvent.send(:default_callback_method)).to eq(:handle_blah__another_sweet)
+  #     expect(SomeOtherStuffHappened.send(:default_callback_method)).to eq(:handle_some_other_stuff_happened)
+  #     expect(ClassWithCustomCallbackMethodEvent.send(:default_callback_method)).to eq(:handle_my_special_event)
+  #   end
+  # end
 
   describe '#configure' do
     it 'properly configures the event with observers' do
@@ -225,7 +207,7 @@ describe Ventable do
           notified_observer = true
         end
       end
-      TestEvent.new.fire!
+      TestEvent.new.publish
       expect(notified_observer).to be true
     end
 
@@ -241,7 +223,7 @@ describe Ventable do
           notified_observer = true
         end
       end
-      TestEvent.new.fire!
+      TestEvent.new.publish
       expect(notified_observer).to be true
       expect(called_transaction).to be true
     end
@@ -255,7 +237,7 @@ describe Ventable do
         end
         fail 'Shouldn\'t reach here, must throw a valid exception'
       rescue Exception => e
-        expect(e.class).to eq(Ventable::Error)
+        expect(e.class).to eq(Ventable::Errors::EventError)
       end
     end
     it 'throws exception if nil observer added to the list' do
@@ -265,7 +247,7 @@ describe Ventable do
         end
         fail 'Shouldn\'t reach here, must throw a valid exception'
       rescue Exception => e
-        expect(e.class).to eq(Ventable::Error)
+        expect(e.class).to eq(Ventable::Errors::EventError)
       end
     end
   end

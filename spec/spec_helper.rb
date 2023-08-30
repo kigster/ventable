@@ -1,5 +1,6 @@
 require 'simplecov'
 require 'rspec'
+require 'rspec/its'
 
 SimpleCov.start
 
