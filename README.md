@@ -5,7 +5,7 @@
 [![RSpec](https://github.com/kigster/ventable/actions/workflows/ruby.yml/badge.svg)](https://github.com/kigster/ventable/actions/workflows/ruby.yml)
 [![Rubocop](https://github.com/kigster/ventable/actions/workflows/rubocop.yml/badge.svg)](https://github.com/kigster/ventable/actions/workflows/rubocop.yml)
 
-# Ventable
+# Ventable — Observable Pattern On Steroids
 
 This gem is a variation of the [Observer Design Pattern](https://en.wikipedia.org/wiki/Observer_pattern). 
 
@@ -32,10 +32,10 @@ Ventable has several plugins that add various functionality on top of the basic 
 This gem has been verified to work in the following ruby versions:
 
  * MRI Ruby
-   * 1.9.3-p551
-   * 2.2
-   * 2.3
-   * 2.4
+   * 3.2
+   * 3.1
+   * 3.0
+   * 2.7
 
 The gem also likely works with non-MRI rubies, but it has not been tested.
     
