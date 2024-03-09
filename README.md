@@ -1,14 +1,8 @@
-[![Gem Version](https://badge.fury.io/rb/ventable.svg)]
-
-[![Code Climate](https://codeclimate.com/github/kigster/ventable/badges/gpa.svg)]
-
-[![Gitter](https://img.shields.io/gitter/room/gitterHQ/gitter.svg)]
-
-(https://gitter.im/kigster/ventable)
-[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fkigster%2Fventable.svg?type=shield)
+![Gem Version](https://badge.fury.io/rb/ventable.svg)
+[![Gitter](https://img.shields.io/gitter/room/gitterHQ/gitter.svg)](https://gitter.im/kigster/ventable)
+![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fkigster%2Fventable.svg?type=shield)
 
 [![RSpec](https://github.com/kigster/ventable/actions/workflows/ruby.yml/badge.svg)](https://github.com/kigster/ventable/actions/workflows/ruby.yml)
-
 [![Rubocop](https://github.com/kigster/ventable/actions/workflows/rubocop.yml/badge.svg)](https://github.com/kigster/ventable/actions/workflows/rubocop.yml)
 
 # Ventable
