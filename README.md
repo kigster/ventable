@@ -1,9 +1,10 @@
-[![Gem Version](https://badge.fury.io/rb/ventable.svg)](https://badge.fury.io/rb/ventable)
-[![Build Status](https://travis-ci.org/kigster/ventable.svg?branch=master)](https://travis-ci.org/kigster/ventable)
+[![Gem Version](https://badge.fury.io/rb/ventable.svg)](https://badge.fury.io/rb/
 [![Code Climate](https://codeclimate.com/github/kigster/ventable/badges/gpa.svg)](https://codeclimate.com/github/kigster/ventable)
 [![Downloads](http://ruby-gem-downloads-badge.herokuapp.com/ventable?type=total)](https://rubygems.org/gems/ventable)
 [![Gitter](https://img.shields.io/gitter/room/gitterHQ/gitter.svg)](https://gitter.im/kigster/ventable)
 [![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fkigster%2Fventable.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2Fkigster%2Fventable?ref=badge_shield)
+
+[![RSpec](https://github.com/kigster/ventable/actions/workflows/ruby.yml/badge.svg)](https://github.com/kigster/ventable/actions/workflows/ruby.yml)p
 
 [![Test Coverage](https://api.codeclimate.com/v1/badges/c28d141c978293886d21/test_coverage)](https://codeclimate.com/github/kigster/ventable/test_coverage)
 
