@@ -18,3 +18,5 @@ test/version_tmp
 tmp
 .idea/
 vendor/
+.rubocop/cache
+.rubocop-*
