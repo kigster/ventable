@@ -56,8 +56,8 @@ module ::Ventable
     end
 
     module ClassMethods
-      def configure(&)
-        class_eval(&)
+      def configure(&block)
+        class_eval(&block)
       end
 
       def notifies(*observer_list, **options, &block)
@@ -75,7 +75,7 @@ module ::Ventable
       end
 
       def group(name, &block)
-        observers << { name:,
+        observers << { name: name,
                        around_block: block,
                        observers: Set.new }
       end
