@@ -209,7 +209,7 @@ describe Ventable do
       end
     end
 
-    it 'properlies set the callback method name' do
+    it 'properties set the callback method name' do
       expect(SomeAwesomeEvent.send(:default_callback_method)).to eq(:handle_some_awesome)
       expect(Blah::AnotherSweetEvent.send(:default_callback_method)).to eq(:handle_blah__another_sweet)
       expect(SomeOtherStuffHappened.send(:default_callback_method)).to eq(:handle_some_other_stuff_happened)
