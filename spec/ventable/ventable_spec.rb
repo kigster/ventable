@@ -207,6 +207,14 @@ describe Ventable do
           :handle_my_special_event
         end
       end
+
+      module Blah
+        module Foo
+          class BarClosedEvent
+            include Ventable::Event
+          end
+        end
+      end
     end
 
     it 'properties set the callback method name' do
@@ -214,6 +222,10 @@ describe Ventable do
       expect(Blah::AnotherSweetEvent.send(:default_callback_method)).to eq(:handle_blah__another_sweet)
       expect(SomeOtherStuffHappened.send(:default_callback_method)).to eq(:handle_some_other_stuff_happened)
       expect(ClassWithCustomCallbackMethodEvent.send(:default_callback_method)).to eq(:handle_my_special_event)
+    end
+
+    it 'properly underscores the default event handler method' do
+      expect(Blah::Foo::BarClosedEvent.send(:default_callback_method)).to eq(:handle_blah__foo__bar_closed)
     end
   end
 

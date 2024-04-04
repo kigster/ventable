@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require 'set'
+require 'active_support/inflector'
 
 module ::Ventable
   class Error < RuntimeError
@@ -93,7 +94,11 @@ module ::Ventable
           ventable_callback_method_name
         else
           target = self
-          method = "handle_#{target.name.gsub('::', '__').underscore.gsub('_event', '')}"
+
+          method = "handle_#{ActiveSupport::Inflector.underscore(target.name)}".
+                   gsub(%r{/([^/]*)}, '__\1').
+                   gsub(/_event$/, '')
+
           method.to_sym
         end
       end
