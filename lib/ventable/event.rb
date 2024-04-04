@@ -1,21 +1,22 @@
 # frozen_string_literal: true
 
 require 'set'
+require 'active_support/inflector'
 
 module ::Ventable
   class Error < RuntimeError
   end
 
   module Event
-    def self.included(klazz)
-      klazz.instance_eval do
+    def self.included(klass)
+      klass.instance_eval do
         @observers = Set.new
         class << self
           attr_accessor :observers
         end
       end
 
-      klazz.extend ClassMethods
+      klass.extend ClassMethods
     end
 
     def fire!
@@ -30,8 +31,7 @@ module ::Ventable
       observer_set.each do |observer_entry|
         if observer_entry.is_a?(Hash)
           around_block = observer_entry[:around_block]
-          inside_block = -> { notify_observer_set(observer_entry[:observers]) }
-          around_block.call(inside_block)
+          around_block&.call(-> { notify_observer_set(observer_entry[:observers]) })
         else
           notify_observer(observer_entry)
         end
@@ -94,7 +94,11 @@ module ::Ventable
           ventable_callback_method_name
         else
           target = self
-          method = "handle_#{target.name.gsub('::', '__').underscore.gsub('_event', '')}"
+
+          method = "handle_#{ActiveSupport::Inflector.underscore(target.name)}".
+                   gsub(%r{/([^/]*)}, '__\1').
+                   gsub(/_event$/, '')
+
           method.to_sym
         end
       end

@@ -14,5 +14,8 @@ Gem::Specification.new do |gem|
   gem.name          = "ventable"
   gem.require_paths = ["lib"]
   gem.version       = Ventable::VERSION
+
   gem.metadata['rubygems_mfa_required'] = 'true'
+
+  gem.add_runtime_dependency 'activesupport', '>= 5'
 end
