@@ -46,6 +46,7 @@ describe Ventable do
       class AnotherEvent
         include Ventable::Event
       end
+
       expect(AnotherEvent.observers.object_id).not_to eq(TestEvent.observers.object_id)
     end
   end
@@ -57,12 +58,12 @@ describe Ventable do
       end
     end
 
-    it 'properlies call a Proc observer' do
+    it 'properly call a Proc observer' do
       run_block = false
-      event     = nil
+      event = nil
       TestEvent.notifies do |e|
         run_block = true
-        event     = e
+        event = e
       end
       expect(run_block).to be(false)
       expect(event).to be_nil
@@ -114,7 +115,7 @@ describe Ventable do
         expect(TestEvent.flag).to eq('boo')
       end
 
-      it 'alsoes fire via the publish alias' do
+      it 'also fire via the publish alias' do
         event.publish
       end
 
@@ -122,6 +123,7 @@ describe Ventable do
         before {
           class ObserverWithoutAHandler
           end
+
           TestEvent.notifies ObserverWithoutAHandler
         }
 
@@ -131,10 +133,10 @@ describe Ventable do
       end
     end
 
-    it 'properlies call a group of observers' do
-      transaction_called    = false
+    it 'properly call a group of observers' do
+      transaction_called = false
       transaction_completed = false
-      transaction           = ->(observer_block) {
+      transaction = ->(observer_block) {
         transaction_called = true
         observer_block.call
         transaction_completed = true
@@ -146,11 +148,11 @@ describe Ventable do
       # this flag ensures that this block really runs inside
       # the transaction group block
       transaction_already_completed = false
-      event_inside                  = nil
+      event_inside = nil
       TestEvent.notifies inside: :transaction do |event|
-        observer_block_called         = true
+        observer_block_called = true
         transaction_already_completed = transaction_completed
-        event_inside                  = event
+        event_inside = event
       end
 
       expect(transaction_called).to be false
@@ -196,10 +198,6 @@ describe Ventable do
         end
       end
 
-      class SomeOtherStuffHappened
-        include Ventable::Event
-      end
-
       class ClassWithCustomCallbackMethodEvent
         include Ventable::Event
 
@@ -217,14 +215,19 @@ describe Ventable do
       end
     end
 
-    it 'properties set the callback method name' do
+    it 'properly sets the callback method on a Module-less class' do
       expect(SomeAwesomeEvent.send(:default_callback_method)).to eq(:handle_some_awesome)
+    end
+
+    it 'properly sets the callback method on a Class within a Module' do
       expect(Blah::AnotherSweetEvent.send(:default_callback_method)).to eq(:handle_blah__another_sweet)
-      expect(SomeOtherStuffHappened.send(:default_callback_method)).to eq(:handle_some_other_stuff_happened)
+    end
+
+    it 'properly sets the callback method on a class with a custom default method handler name' do
       expect(ClassWithCustomCallbackMethodEvent.send(:default_callback_method)).to eq(:handle_my_special_event)
     end
 
-    it 'properly underscores the default event handler method' do
+    it 'properly sets the callback method on a class within a nested module' do
       expect(Blah::Foo::BarClosedEvent.send(:default_callback_method)).to eq(:handle_blah__foo__bar_closed)
     end
   end
@@ -242,7 +245,7 @@ describe Ventable do
     end
 
     it 'configures observers with groups' do
-      notified_observer  = false
+      notified_observer = false
       called_transaction = false
       TestEvent.configure do
         group :transaction, &->(b) {
